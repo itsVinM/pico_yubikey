@@ -31,4 +31,9 @@ namespace yk::core {
             crc = kCrc32Table[(crc ^ b) & 0xFFu] ^ (crc >> 8);
         return crc ^ 0xFFFFFFFFu;
     }
+
+    // Already finalized by crc32(); present for API compatibility.
+    inline std::uint32_t crc32_final(std::uint32_t crc) noexcept {
+        return crc;
+    }
 } // namespace yk::core

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libyk_core.a CMakeFiles/yk_core.dir/core/sha1.cpp.o CMakeFiles/yk_core.dir/core/command.cpp.o
+/usr/bin/ranlib libyk_core.a

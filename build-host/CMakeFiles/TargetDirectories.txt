@@ -1,0 +1,11 @@
+/Users/vins/Documents/coding/pico-yubikey/build-host/CMakeFiles/test.dir
+/Users/vins/Documents/coding/pico-yubikey/build-host/CMakeFiles/edit_cache.dir
+/Users/vins/Documents/coding/pico-yubikey/build-host/CMakeFiles/rebuild_cache.dir
+/Users/vins/Documents/coding/pico-yubikey/build-host/src/CMakeFiles/yk_core.dir
+/Users/vins/Documents/coding/pico-yubikey/build-host/src/CMakeFiles/test.dir
+/Users/vins/Documents/coding/pico-yubikey/build-host/src/CMakeFiles/edit_cache.dir
+/Users/vins/Documents/coding/pico-yubikey/build-host/src/CMakeFiles/rebuild_cache.dir
+/Users/vins/Documents/coding/pico-yubikey/build-host/tests/CMakeFiles/yk_tests.dir
+/Users/vins/Documents/coding/pico-yubikey/build-host/tests/CMakeFiles/test.dir
+/Users/vins/Documents/coding/pico-yubikey/build-host/tests/CMakeFiles/edit_cache.dir
+/Users/vins/Documents/coding/pico-yubikey/build-host/tests/CMakeFiles/rebuild_cache.dir

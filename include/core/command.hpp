@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <span>
 
-namespace yk {
+namespace yk::core {
 
     // Config protocol between host and device.
     //

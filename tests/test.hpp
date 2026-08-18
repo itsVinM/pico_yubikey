@@ -63,6 +63,3 @@ inline int run_all() {
 }
 
 } // namespace test
-int main() {
-    return ::test::run_all();
-}

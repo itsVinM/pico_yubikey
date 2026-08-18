@@ -37,5 +37,6 @@ endif()
 
 add_subdirectory(src)
 if(NOT CMAKE_CROSSCOMPILING)
+    enable_testing()
     add_subdirectory(tests)
 endif()

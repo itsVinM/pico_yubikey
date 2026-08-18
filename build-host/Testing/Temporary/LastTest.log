@@ -1,0 +1,82 @@
+Start testing: Aug 18 20:45 CEST
+----------------------------------------------------------
+1/1 Testing: yk_tests
+1/1 Test: yk_tests
+Command: "/Users/vins/Documents/coding/pico-yubikey/build-host/tests/yk_tests"
+Directory: /Users/vins/Documents/coding/pico-yubikey/build-host/tests
+"yk_tests" start time: Aug 18 20:45 CEST
+Output:
+----------------------------------------------------------
+[ RUN  ] sha1_empty
+[ DONE ] sha1_empty
+[ RUN  ] sha1_abc
+[ DONE ] sha1_abc
+[ RUN  ] sha1_two_block
+[ DONE ] sha1_two_block
+[ RUN  ] sha1_streaming_equals_oneshot
+[ DONE ] sha1_streaming_equals_oneshot
+[ RUN  ] hmac_sha1_rfc2202_case1
+[ DONE ] hmac_sha1_rfc2202_case1
+[ RUN  ] hmac_sha1_rfc2202_case2
+[ DONE ] hmac_sha1_rfc2202_case2
+[ RUN  ] hmac_sha1_key_longer_than_block
+[ DONE ] hmac_sha1_key_longer_than_block
+[ RUN  ] hotp_rfc4226_vectors
+[ DONE ] hotp_rfc4226_vectors
+[ RUN  ] hotp_digit_widths
+[ DONE ] hotp_digit_widths
+[ RUN  ] totp_rfc6238_sha1_vectors
+[ DONE ] totp_rfc6238_sha1_vectors
+[ RUN  ] hotp_counter_block_endian
+[ DONE ] hotp_counter_block_endian
+[ RUN  ] totp_period_large
+[ DONE ] totp_period_large
+[ RUN  ] storage_roundtrip
+[ DONE ] storage_roundtrip
+[ RUN  ] storage_absent_record
+[ DONE ] storage_absent_record
+[ RUN  ] storage_corruption_detected
+[ DONE ] storage_corruption_detected
+[ RUN  ] storage_slot_index_mismatch
+[ DONE ] storage_slot_index_mismatch
+[ RUN  ] storage_static_password_roundtrip
+[ DONE ] storage_static_password_roundtrip
+[ RUN  ] cmd_get_status_empty
+[ DONE ] cmd_get_status_empty
+[ RUN  ] cmd_set_and_get_slot
+[ DONE ] cmd_set_and_get_slot
+[ RUN  ] cmd_clear_slot
+[ DONE ] cmd_clear_slot
+[ RUN  ] cmd_bad_slot_rejected
+[ DONE ] cmd_bad_slot_rejected
+[ RUN  ] cmd_challenge_response
+[ DONE ] cmd_challenge_response
+[ RUN  ] cmd_time_offset
+[ DONE ] cmd_time_offset
+[ RUN  ] cmd_unknown_command
+[ DONE ] cmd_unknown_command
+[ RUN  ] press_scanner_short_press
+[ DONE ] press_scanner_short_press
+[ RUN  ] press_scanner_long_press
+[ DONE ] press_scanner_long_press
+[ RUN  ] press_scanner_short_swallowed_after_long
+[ DONE ] press_scanner_short_swallowed_after_long
+[ RUN  ] press_scanner_bounce_ignored
+[ DONE ] press_scanner_bounce_ignored
+[ RUN  ] slot_execute_hotp_advances_counter
+[ DONE ] slot_execute_hotp_advances_counter
+[ RUN  ] slot_execute_totp_matches_direct
+[ DONE ] slot_execute_totp_matches_direct
+[ RUN  ] slot_execute_static_password
+[ DONE ] slot_execute_static_password
+[ RUN  ] slot_execute_unset_is_empty
+[ DONE ] slot_execute_unset_is_empty
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"yk_tests" end time: Aug 18 20:45 CEST
+"yk_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Aug 18 20:45 CEST
