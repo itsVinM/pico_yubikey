@@ -8,12 +8,12 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/Users/vins/Documents/coding/pico-yubikey/tests/test_all.cpp" "tests/CMakeFiles/yk_tests.dir/test_all.cpp.o" "gcc" "tests/CMakeFiles/yk_tests.dir/test_all.cpp.o.d"
-  "/Users/vins/Documents/coding/pico-yubikey/tests/test_command.cpp" "tests/CMakeFiles/yk_tests.dir/test_command.cpp.o" "gcc" "tests/CMakeFiles/yk_tests.dir/test_command.cpp.o.d"
-  "/Users/vins/Documents/coding/pico-yubikey/tests/test_otp.cpp" "tests/CMakeFiles/yk_tests.dir/test_otp.cpp.o" "gcc" "tests/CMakeFiles/yk_tests.dir/test_otp.cpp.o.d"
-  "/Users/vins/Documents/coding/pico-yubikey/tests/test_sha1.cpp" "tests/CMakeFiles/yk_tests.dir/test_sha1.cpp.o" "gcc" "tests/CMakeFiles/yk_tests.dir/test_sha1.cpp.o.d"
-  "/Users/vins/Documents/coding/pico-yubikey/tests/test_slot.cpp" "tests/CMakeFiles/yk_tests.dir/test_slot.cpp.o" "gcc" "tests/CMakeFiles/yk_tests.dir/test_slot.cpp.o.d"
-  "/Users/vins/Documents/coding/pico-yubikey/tests/test_storage.cpp" "tests/CMakeFiles/yk_tests.dir/test_storage.cpp.o" "gcc" "tests/CMakeFiles/yk_tests.dir/test_storage.cpp.o.d"
+  "/app/tests/test_all.cpp" "tests/CMakeFiles/yk_tests.dir/test_all.cpp.o" "gcc" "tests/CMakeFiles/yk_tests.dir/test_all.cpp.o.d"
+  "/app/tests/test_command.cpp" "tests/CMakeFiles/yk_tests.dir/test_command.cpp.o" "gcc" "tests/CMakeFiles/yk_tests.dir/test_command.cpp.o.d"
+  "/app/tests/test_otp.cpp" "tests/CMakeFiles/yk_tests.dir/test_otp.cpp.o" "gcc" "tests/CMakeFiles/yk_tests.dir/test_otp.cpp.o.d"
+  "/app/tests/test_sha1.cpp" "tests/CMakeFiles/yk_tests.dir/test_sha1.cpp.o" "gcc" "tests/CMakeFiles/yk_tests.dir/test_sha1.cpp.o.d"
+  "/app/tests/test_slot.cpp" "tests/CMakeFiles/yk_tests.dir/test_slot.cpp.o" "gcc" "tests/CMakeFiles/yk_tests.dir/test_slot.cpp.o.d"
+  "/app/tests/test_storage.cpp" "tests/CMakeFiles/yk_tests.dir/test_storage.cpp.o" "gcc" "tests/CMakeFiles/yk_tests.dir/test_storage.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

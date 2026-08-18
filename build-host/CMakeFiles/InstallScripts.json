@@ -1,9 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/Users/vins/Documents/coding/pico-yubikey/build-host/cmake_install.cmake",
-		"/Users/vins/Documents/coding/pico-yubikey/build-host/src/cmake_install.cmake",
-		"/Users/vins/Documents/coding/pico-yubikey/build-host/tests/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

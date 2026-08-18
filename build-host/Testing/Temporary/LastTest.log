@@ -1,10 +1,10 @@
-Start testing: Aug 18 20:45 CEST
+Start testing: Aug 18 18:57 UTC
 ----------------------------------------------------------
 1/1 Testing: yk_tests
 1/1 Test: yk_tests
-Command: "/Users/vins/Documents/coding/pico-yubikey/build-host/tests/yk_tests"
-Directory: /Users/vins/Documents/coding/pico-yubikey/build-host/tests
-"yk_tests" start time: Aug 18 20:45 CEST
+Command: "/app/build-host/tests/yk_tests"
+Directory: /app/build-host/tests
+"yk_tests" start time: Aug 18 18:57 UTC
 Output:
 ----------------------------------------------------------
 [ RUN  ] sha1_empty
@@ -72,11 +72,11 @@ Output:
 [ RUN  ] slot_execute_unset_is_empty
 [ DONE ] slot_execute_unset_is_empty
 <end of output>
-Test time =   0.01 sec
+Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"yk_tests" end time: Aug 18 20:45 CEST
+"yk_tests" end time: Aug 18 18:57 UTC
 "yk_tests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-End testing: Aug 18 20:45 CEST
+End testing: Aug 18 18:57 UTC
