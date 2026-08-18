@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/yk_tests.dir/test_all.cpp.o CMakeFiles/yk_tests.dir/test_sha1.cpp.o CMakeFiles/yk_tests.dir/test_otp.cpp.o CMakeFiles/yk_tests.dir/test_storage.cpp.o CMakeFiles/yk_tests.dir/test_command.cpp.o CMakeFiles/yk_tests.dir/test_slot.cpp.o -o yk_tests  ../src/libyk_core.a 

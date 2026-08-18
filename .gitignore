@@ -1,0 +1,14 @@
+build-host/
+build-fw/
+*.o
+*.d
+*.elf
+*.uf2
+*.bin
+*.map
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+Testing/
+.claude/
