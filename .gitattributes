@@ -1,0 +1,8 @@
+# GitHub Linguist overrides
+*.cpp linguist-language=C++
+*.hpp linguist-language=C++
+*.h linguist-language=C++
+CMakeLists.txt linguist-language=CMake
+*.cmake linguist-language=CMake
+*.sh linguist-language=Shell
+*.robot linguist-language=RobotFramework
