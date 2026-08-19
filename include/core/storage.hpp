@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cstdint>
 #include <span>
 
@@ -28,15 +29,12 @@ namespace yk::core {
             std::uint32_t slot_index) noexcept {
                 std::fill(out.begin(), out.end(), 0);
                 const auto put32 = [&](std::size_t off, std::uint32_t v){
-                    out[off ] = static_cast<std::uint8_t>(v );
-                    out[off + 1] = static_cast<std::uint8_t>(v >> 8);
-                    out[off + 2] = static_cast<std::uint8_t>(v >> 16);
-                    out[off + 3] = static_cast<std::uint8_t>(v >> 24);
+                    auto bytes = std::bit_cast<std::array<std::uint8_t, 4>>(v);
+                    std::copy(bytes.begin(), bytes.end(), out.begin() + off);
                 };
                 const auto put64 = [&](std::size_t off, std::uint64_t v){
-                    for (std::size_t idx = 0; idx < 8; ++idx){
-                        out[off + idx] = static_cast<std::uint8_t>(v >> (8 * idx));
-                    }
+                    auto bytes = std::bit_cast<std::array<std::uint8_t, 8>>(v);
+                    std::copy(bytes.begin(), bytes.end(), out.begin() + off);
                 };
 
                 put32(0, kMagic);
@@ -66,18 +64,15 @@ namespace yk::core {
                 std::uint32_t slot_index) noexcept {
                 if (in.size() < kRecordBytes) { return false; }
                 const auto get32 = [&](std::size_t off) -> std::uint32_t {
-                    return static_cast<std::uint32_t>(in[off]) |
-                           (static_cast<std::uint32_t>(in[off + 1]) << 8) |
-                           (static_cast<std::uint32_t>(in[off + 2]) << 16) |
-                           (static_cast<std::uint32_t>(in[off + 3]) << 24);
+                    std::array<std::uint8_t, 4> bytes;
+                    std::copy_n(in.begin() + off, 4, bytes.begin());
+                    return std::bit_cast<std::uint32_t>(bytes);
                 };
 
                 const auto get64 = [&](std::size_t off) -> std::uint64_t {
-                    std::uint64_t v = 0;
-                    for (std::size_t idx = 0; idx < 8; ++idx){
-                        v |= static_cast<std::uint64_t>(in[off + idx]) << (8 * idx);
-                    }
-                    return v;
+                    std::array<std::uint8_t, 8> bytes;
+                    std::copy_n(in.begin() + off, 8, bytes.begin());
+                    return std::bit_cast<std::uint64_t>(bytes);
                 };
 
                 if (get32(0) != kMagic) { return false; }

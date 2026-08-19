@@ -42,58 +42,62 @@ bool slot_ok(std::uint32_t slot) noexcept {
 std::size_t dispatch(Session& s, std::span<const std::uint8_t> in,
                      std::span<std::uint8_t> out,
                      std::uint64_t epoch_now_secs) noexcept {
-    if (in.empty()) return put_status(out, Status::bad_command);
+    using enum CmdId;
+    using enum Status;
+
+    if (in.empty()) return put_status(out, bad_command);
 
     switch (static_cast<CmdId>(in[0])) {
-        case CmdId::get_status: {
-            if (out.size() < 4) return put_status(out, Status::bad_param);
-            out[0] = static_cast<std::uint8_t>(Status::ok);
+        case get_status: {
+            if (out.size() < 4) return put_status(out, bad_param);
+            out[0] = static_cast<std::uint8_t>(ok);
             out[1] = static_cast<std::uint8_t>(Slot::count);
             for (std::uint32_t i = 0; i < static_cast<std::uint32_t>(Slot::count); i++)
                 out[2 + i] = static_cast<std::uint8_t>(s.slots[i].mode);
             return 2 + static_cast<std::uint32_t>(Slot::count);
         }
 
-        case CmdId::set_slot: {
-            if (in.size() < 9) return put_status(out, Status::bad_param);
+        case set_slot: {
+            if (in.size() < 9) return put_status(out, bad_param);
             const std::uint32_t slot = in[1];
-            if (!slot_ok(slot)) return put_status(out, Status::bad_slot);
+            if (!slot_ok(slot)) return put_status(out, bad_slot);
             const std::uint32_t secret_len = in[8];
             if (secret_len > kMaxSecretBytes || in.size() < 9u + secret_len)
-                return put_status(out, Status::bad_param);
+                return put_status(out, bad_param);
 
-            SlotConfig cfg{};
-            cfg.mode = static_cast<SlotMode>(in[2]);
-            cfg.digits = in[3];
-            cfg.period_secs = get_u32(in, 4);
-            cfg.secret_len = secret_len;
+            SlotConfig cfg{
+                .mode = static_cast<SlotMode>(in[2]),
+                .digits = in[3],
+                .period_secs = get_u32(in, 4),
+                .secret_len = secret_len,
+            };
             for (std::uint32_t i = 0; i < secret_len; i++)
                 cfg.secret[i] = in[9 + i];
 
             s.slots[slot] = cfg;
             s.states[slot].hotp_counter = 0;
             s.config_dirty = true;
-            return put_status(out, Status::ok);
+            return put_status(out, ok);
         }
 
-        case CmdId::clear_slot: {
-            if (in.size() < 2) return put_status(out, Status::bad_param);
+        case clear_slot: {
+            if (in.size() < 2) return put_status(out, bad_param);
             const std::uint32_t slot = in[1];
-            if (!slot_ok(slot)) return put_status(out, Status::bad_slot);
+            if (!slot_ok(slot)) return put_status(out, bad_slot);
             s.slots[slot] = SlotConfig{};
             s.states[slot].hotp_counter = 0;
             s.config_dirty = true;
-            return put_status(out, Status::ok);
+            return put_status(out, ok);
         }
 
-        case CmdId::get_slot: {
-            if (in.size() < 2) return put_status(out, Status::bad_param);
+        case get_slot: {
+            if (in.size() < 2) return put_status(out, bad_param);
             const std::uint32_t slot = in[1];
-            if (!slot_ok(slot)) return put_status(out, Status::bad_slot);
+            if (!slot_ok(slot)) return put_status(out, bad_slot);
             const SlotConfig& cfg = s.slots[slot];
             if (out.size() < 6u + cfg.secret_len)
-                return put_status(out, Status::bad_param);
-            out[0] = static_cast<std::uint8_t>(Status::ok);
+                return put_status(out, bad_param);
+            out[0] = static_cast<std::uint8_t>(ok);
             out[1] = static_cast<std::uint8_t>(cfg.mode);
             out[2] = cfg.digits;
             out[3] = static_cast<std::uint8_t>(cfg.period_secs);
@@ -105,15 +109,15 @@ std::size_t dispatch(Session& s, std::span<const std::uint8_t> in,
             return 7u + cfg.secret_len;
         }
 
-        case CmdId::challenge: {
-            if (in.size() < 3) return put_status(out, Status::bad_param);
+        case challenge: {
+            if (in.size() < 3) return put_status(out, bad_param);
             const std::uint32_t slot = in[1];
-            if (!slot_ok(slot)) return put_status(out, Status::bad_slot);
+            if (!slot_ok(slot)) return put_status(out, bad_slot);
             const std::uint32_t challenge_len = in[2];
             if (challenge_len > kMaxChallengeBytes || in.size() < 3u + challenge_len)
-                return put_status(out, Status::bad_param);
+                return put_status(out, bad_param);
             if (s.slots[slot].mode != SlotMode::challenge)
-                return put_status(out, Status::busy);
+                return put_status(out, busy);
 
             s.challenge_slot = slot;
             s.challenge_len = challenge_len;
@@ -121,46 +125,45 @@ std::size_t dispatch(Session& s, std::span<const std::uint8_t> in,
                 s.challenge[i] = in[3 + i];
 
             const auto mac = hmac_sha1(
-                std::span<const std::uint8_t>(s.slots[slot].secret).first(
-                    s.slots[slot].secret_len),
-                std::span<const std::uint8_t>(s.challenge).first(challenge_len));
+                std::span(s.slots[slot].secret).first(s.slots[slot].secret_len),
+                std::span(s.challenge).first(challenge_len));
             if (out.size() < 1u + mac.size())
-                return put_status(out, Status::bad_param);
-            out[0] = static_cast<std::uint8_t>(Status::ok);
+                return put_status(out, bad_param);
+            out[0] = static_cast<std::uint8_t>(ok);
             std::memcpy(out.data() + 1, mac.data(), mac.size());
             return 1u + mac.size();
         }
 
-        case CmdId::set_time: {
-            if (in.size() < 9) return put_status(out, Status::bad_param);
+        case set_time: {
+            if (in.size() < 9) return put_status(out, bad_param);
             const std::uint64_t target = get_u64(in, 1);
             s.time_offset_secs = target - epoch_now_secs;
-            return put_status(out, Status::ok);
+            return put_status(out, ok);
         }
 
-        case CmdId::get_time: {
-            if (out.size() < 9) return put_status(out, Status::bad_param);
-            out[0] = static_cast<std::uint8_t>(Status::ok);
+        case get_time: {
+            if (out.size() < 9) return put_status(out, bad_param);
+            out[0] = static_cast<std::uint8_t>(ok);
             put_u64(out, 1, epoch_now_secs);
             return 9;
         }
 
-        case CmdId::set_static: {
-            if (in.size() < 3) return put_status(out, Status::bad_param);
+        case set_static: {
+            if (in.size() < 3) return put_status(out, bad_param);
             const std::uint32_t slot = in[1];
-            if (!slot_ok(slot)) return put_status(out, Status::bad_slot);
+            if (!slot_ok(slot)) return put_status(out, bad_slot);
             const std::uint32_t text_len = in[2];
             if (text_len > kMaxStaticBytes || in.size() < 3u + text_len)
-                return put_status(out, Status::bad_param);
+                return put_status(out, bad_param);
             s.slots[slot].static_len = text_len;
             for (std::uint32_t i = 0; i < text_len; i++)
                 s.slots[slot].static_text[i] = static_cast<char>(in[3 + i]);
             s.config_dirty = true;
-            return put_status(out, Status::ok);
+            return put_status(out, ok);
         }
 
         default:
-            return put_status(out, Status::bad_command);
+            return put_status(out, bad_command);
     }
 }
 

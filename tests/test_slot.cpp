@@ -44,10 +44,11 @@ TEST(press_scanner_bounce_ignored) {
 }
 
 TEST(slot_execute_hotp_advances_counter) {
-    yk::core::SlotConfig cfg;
-    cfg.mode = yk::core::SlotMode::hotp;
-    cfg.digits = 6;
-    cfg.secret_len = 20;
+    yk::core::SlotConfig cfg{
+        .mode = yk::core::SlotMode::hotp,
+        .digits = 6,
+        .secret_len = 20,
+    };
     for (std::uint32_t i = 0; i < 20; i++)
         cfg.secret[i] = static_cast<std::uint8_t>("12345678901234567890"[i]);
 
@@ -64,11 +65,12 @@ TEST(slot_execute_hotp_advances_counter) {
 }
 
 TEST(slot_execute_totp_matches_direct) {
-    yk::core::SlotConfig cfg;
-    cfg.mode = yk::core::SlotMode::totp;
-    cfg.digits = 8;
-    cfg.period_secs = 30;
-    cfg.secret_len = 20;
+    yk::core::SlotConfig cfg{
+        .mode = yk::core::SlotMode::totp,
+        .digits = 8,
+        .period_secs = 30,
+        .secret_len = 20,
+    };
     for (std::uint32_t i = 0; i < 20; i++)
         cfg.secret[i] = static_cast<std::uint8_t>("12345678901234567890"[i]);
 
@@ -83,9 +85,10 @@ TEST(slot_execute_totp_matches_direct) {
 }
 
 TEST(slot_execute_static_password) {
-    yk::core::SlotConfig cfg;
-    cfg.mode = yk::core::SlotMode::static_password;
-    cfg.static_len = 5;
+    yk::core::SlotConfig cfg{
+        .mode = yk::core::SlotMode::static_password,
+        .static_len = 5,
+    };
     for (std::uint32_t i = 0; i < 5; i++) cfg.static_text[i] = "hello"[i];
     yk::core::SlotState state;
     const auto out = yk::core::execute_slot(cfg, state, 0);

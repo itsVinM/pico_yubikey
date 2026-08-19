@@ -10,14 +10,17 @@ namespace {
 std::array<std::uint8_t, yk::core::storage::kRecordBytes> buffer{};
 
 yk::core::storage::Record make_record() {
-    yk::core::storage::Record r;
-    r.config.mode = yk::core::SlotMode::hotp;
-    r.config.digits = 8;
-    r.config.period_secs = 30;
-    r.config.secret_len = 20;
+    yk::core::storage::Record r{
+        .config = {
+            .mode = yk::core::SlotMode::hotp,
+            .digits = 8,
+            .period_secs = 30,
+            .secret_len = 20,
+        },
+        .state = {.hotp_counter = 4242},
+    };
     for (std::uint32_t i = 0; i < 20; i++)
         r.config.secret[i] = static_cast<std::uint8_t>(i * 7 + 1);
-    r.state.hotp_counter = 4242;
     return r;
 }
 
@@ -62,9 +65,13 @@ TEST(storage_slot_index_mismatch) {
 }
 
 TEST(storage_static_password_roundtrip) {
-    yk::core::storage::Record r;
-    r.config.mode = yk::core::SlotMode::static_password;
-    r.config.static_len = 12;
+    yk::core::storage::Record r{
+        .config = {
+            .mode = yk::core::SlotMode::static_password,
+            .static_len = 12,
+        },
+        .state = {},
+    };
     const char* text = "correct horse";
     for (std::uint32_t i = 0; i < 12; i++)
         r.config.static_text[i] = text[i];

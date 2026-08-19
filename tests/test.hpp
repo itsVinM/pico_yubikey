@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstdio>
+#include <format>
 #include <functional>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -31,17 +33,15 @@ struct Register {
     static void test_##name()
 
 // Aborts the current test with a formatted message.
-#define FAIL(...)                                                              \
+#define FAIL(msg)                                                              \
     do {                                                                       \
-        std::printf("  FAIL %s:%d: ", __FILE__, __LINE__);                     \
-        std::printf(__VA_ARGS__);                                              \
-        std::printf("\n");                                                     \
+        std::cerr << std::format("  FAIL {}:{}: {}\n", __FILE__, __LINE__, msg);\
         return;                                                                \
     } while (false)
 
 #define CHECK(expr)                                                            \
     do {                                                                       \
-        if (!(expr)) FAIL("CHECK failed: %s", #expr);                          \
+        if (!(expr)) FAIL(std::format("CHECK failed: {}", #expr));             \
     } while (false)
 
 #define CHECK_EQUAL(a, b)                                                         \
@@ -49,7 +49,7 @@ struct Register {
         const auto va = (a);                                                   \
         const auto vb = (b);                                                   \
         if (!(va == vb))                                                       \
-            FAIL("CHECK_EQUAL(%s, %s)", #a, #b);                                  \
+            FAIL(std::format("CHECK_EQUAL({}, {})", #a, #b));                  \
     } while (false)
 
 inline int run_all() {
