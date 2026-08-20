@@ -2,7 +2,9 @@
 
 #include "pico/stdlib.h"
 
-namespace yk::rp2040{
+#include <cstdint>
+
+namespace yk::rp2040 {
 	// onboard led with sw heartbeat
 	class Led{
 	public:
@@ -21,7 +23,7 @@ namespace yk::rp2040{
 	// Push-button, active low internal pull-up
 	class Button{
 	public:
-		explicit Button(std::uin32_t pin) noexcept : pin_(pin) {
+		explicit Button(std::uint32_t pin) noexcept : pin_(pin) {
 			gpio_init(pin_);
 			gpio_set_dir(pin_, GPIO_IN);
 			gpio_pull_up(pin_);

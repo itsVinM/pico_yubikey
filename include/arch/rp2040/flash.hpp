@@ -3,6 +3,8 @@
 #include "core/command.hpp"
 #include "core/storage.hpp"
 
+#include <cstdint>
+
 namespace yk::rp2040 {
     // Persistent slot storage on the RP2040's on-chip flash (2 MB). Config lives
     // in the final 64 KiB of flash so it can never collide with the firmware.
@@ -14,10 +16,10 @@ namespace yk::rp2040 {
     class FlashStore {
     public:
         // Read both slots from flash
-        void load(cmd::Session& session) const noexcept;
-        bool save(const cmd::Session& session) const noexcept;
+        void load(yk::core::cmd::Session& session) const noexcept;
+        bool save(const yk::core::cmd::Session& session) const noexcept;
     private:
-        void load_one(cmd::Session& session, std::uin32_t slot_index) const noexcept;
+        void load_one(yk::core::cmd::Session& session, std::uint32_t slot_index) const noexcept;
     };
 
     inline constexpr std::uint32_t kFlashDataOffset = 0x1F0000;  // last 64 KiB
@@ -25,6 +27,6 @@ namespace yk::rp2040 {
     // One flash page (256 B) holds both 128-byte records. The pico-sdk flash API
     // requires 256-byte-aligned, page-sized writes.
     inline constexpr std::uint32_t kRecordSlotBytes =
-        (yk::storage::kRecordBytes + 127) & ~127u;  // 128 per slot
+        (yk::core::storage::kRecordBytes + 127) & ~127u;  // 128 per slot
     inline constexpr std::uint32_t kPageBytes = 256;
 }// namespace yk::rp2040

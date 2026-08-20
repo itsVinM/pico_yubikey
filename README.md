@@ -47,10 +47,11 @@ include/core/     portable logic, host-testable, no hardware dependencies
   input.hpp       debounced short/long-press scanner
   crc.hpp         consteval CRC-32 table
 src/core/         implementations (sha1, command)
-include/arch/     RP2040 bindings (gpio, flash, usb, registers)
+include/arch/     RP2040 bindings (gpio, uart, flash, usb, registers)
 src/arch/         RP2040 implementations (flash, usb/TinyUSB)
 src/main.cpp      firmware entry point
 tests/            host unit tests (RFC known-answer vectors)
+tests/rp2040/     algo test harness for Renode (crypto over UART)
 renode/           Renode emulator config and robot tests
 ```
 
@@ -110,12 +111,23 @@ Run the firmware without hardware using Renode:
 ```sh
 ./dev.sh renode          # interactive session with UART console
 ./dev.sh renode-test     # headless robot test (CI-friendly)
+./dev.sh renode-algo     # crypto algo tests on emulated RP2040
 ```
 
 Install Renode:
 ```sh
 brew install renode       # macOS
 # or: https://github.com/renode/renode/releases (Linux x86_64/ARM64)
+```
+
+### Crypto algo tests (Renode)
+
+The `tests/rp2040/` harness runs SHA-1, HMAC-SHA1, HOTP, and TOTP on the
+emulated RP2040 Cortex-M0+ cores, communicating results over UART (GP0/GP1).
+Robot Framework sends RFC test vectors and verifies the output:
+
+```sh
+./dev.sh renode-algo     # runs renode/algo_test.robot
 ```
 
 ## Hardware
@@ -149,20 +161,23 @@ printf '\x02\x00\x01\x06\x1e\x00\x00\x00\x14<secret>\x04' > /dev/tty.usbmodem*
 
 ## dev.sh commands
 
-| Command       | What it does                                      |
-|---------------|---------------------------------------------------|
-| `test`        | Build and run host tests in Docker (default)      |
-| `build`       | Build firmware (requires Pico SDK + ARM toolchain)|
-| `flash`       | Flash .uf2 to Pico via picotool (USB BOOTSEL)    |
-| `renode`      | Launch Renode with UART console                   |
-| `renode-test` | Run Renode headless robot test (CI)               |
-| `shell`       | Interactive shell inside Docker container         |
-| `lint`        | Run clang-tidy on core headers in Docker          |
+| Command        | What it does                                            |
+|----------------|---------------------------------------------------------|
+| `test`         | Build and run host tests in Docker (default)            |
+| `build`        | Build firmware (requires Pico SDK + ARM toolchain)      |
+| `flash`        | Flash .uf2 to Pico via picotool (USB BOOTSEL)          |
+| `renode`       | Launch Renode with UART console                         |
+| `renode-test`  | Run Renode headless boot test (CI)                      |
+| `renode-algo`  | Run crypto algo tests on emulated RP2040 via Renode     |
+| `shell`        | Interactive shell inside Docker container               |
+| `lint`         | Run clang-tidy on core headers in Docker                |
 
 ## Design notes
 
 - The core (`include/core`) is pure and unit-tested on the host; the arch
   layer (`arch/rp2040`) is the only thing that touches the SDK.
+- UART (GP0 TX / GP1 RX) handles config commands in emulation and debug output.
+  USB CDC handles the same protocol on real hardware.
 - Flash records use an explicit little-endian layout + CRC-32, so host and
   device always agree regardless of struct padding.
 - The HOTP counter lives in flash and is write-only-up: `FlashStore::save`

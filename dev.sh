@@ -29,14 +29,15 @@ pico-yubikey dev helper
 Usage: ./dev.sh <command> [args]
 
 Commands:
-  test          Build and run host tests in Docker (default)
-  shell         Interactive shell inside Docker container
-  build         Build firmware (requires Pico SDK)
-  flash         Flash .uf2 to Pico via picotool (USB BOOTSEL)
-  renode        Launch Renode with the firmware ELF
-  renode-test   Run Renode headless test (CI-friendly)
-  lint          Run clang-tidy on core headers
-  <anything>    Pass through to docker run
+  test           Build and run host tests in Docker (default)
+  shell          Interactive shell inside Docker container
+  build          Build firmware (requires Pico SDK)
+  flash          Flash .uf2 to Pico via picotool (USB BOOTSEL)
+  renode         Launch Renode with the firmware ELF
+  renode-test    Run Renode headless test (CI-friendly)
+  renode-algo    Run crypto algo tests on emulated RP2040 via Renode
+  lint           Run clang-tidy on core headers
+  <anything>     Pass through to docker run
 
 Examples:
   ./dev.sh test                          # run tests in Docker
@@ -121,6 +122,18 @@ cmd_renode_test() {
     renode-test renode/pico_yubikey_test.robot
 }
 
+cmd_renode_algo() {
+    if ! command -v renode-test &>/dev/null; then
+        echo "ERROR: renode-test not found (install renode)"
+        exit 1
+    fi
+    if [ ! -f "$FW_BUILD_DIR/tests/rp2040/algo_test.elf" ]; then
+        echo "ERROR: algo_test ELF not found — run './dev.sh build' first"
+        exit 1
+    fi
+    renode-test renode/algo_test.robot
+}
+
 cmd_lint() {
     ensure_docker
     docker build -t "$IMAGE" .
@@ -132,13 +145,14 @@ cmd_lint() {
 # ── dispatch ──────────────────────────────────────────────────────────────
 
 case "${1:-test}" in
-    test)        cmd_test ;;
-    shell|bash)  cmd_shell ;;
-    build)       cmd_build ;;
-    flash)       cmd_flash ;;
-    renode)      cmd_renode ;;
-    renode-test) cmd_renode_test ;;
-    lint)        cmd_lint ;;
-    -h|--help)   usage ;;
-    *)           docker run --rm -it -v "$(pwd)":/app "$IMAGE" "$@" ;;
+    test)           cmd_test ;;
+    shell|bash)     cmd_shell ;;
+    build)          cmd_build ;;
+    flash)          cmd_flash ;;
+    renode)         cmd_renode ;;
+    renode-test)    cmd_renode_test ;;
+    renode-algo)    cmd_renode_algo ;;
+    lint)           cmd_lint ;;
+    -h|--help)      usage ;;
+    *)              docker run --rm -it -v "$(pwd)":/app "$IMAGE" "$@" ;;
 esac
