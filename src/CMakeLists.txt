@@ -10,9 +10,12 @@ if(PICO_SDK_IMPORTED)
   add_executable(pico_yubikey
     main.cpp
     arch/rp2040/flash.cpp
+    arch/rp2040/usb.cpp
   )
-  target_link_libraries(pico_yubikey PRIVATE yk_core pico_stdlib hardware_uart hardware_flash)
-  target_include_directories(pico_yubikey PRIVATE ${PROJECT_SOURCE_DIR}/include)
+  target_link_libraries(pico_yubikey PRIVATE yk_core pico_stdlib tinyusb_device
+    hardware_uart hardware_flash hardware_sync)
+  target_include_directories(pico_yubikey PRIVATE
+    ${PROJECT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR})
   pico_add_extra_outputs(pico_yubikey)
   pico_enable_stdio_usb(pico_yubikey 0)
   pico_enable_stdio_uart(pico_yubikey 1)

@@ -1,13 +1,41 @@
 #include "arch/rp2040/gpio.hpp"
 #include "arch/rp2040/uart.hpp"
 #include "arch/rp2040/flash.hpp"
+#include "arch/rp2040/usb.hpp"
 #include "core/command.hpp"
 #include "core/input.hpp"
+#include "core/slot.hpp"
 
 #include "pico/stdlib.h"
 #include <array>
 #include <cstdint>
 #include <cstring>
+
+namespace {
+
+using yk::core::cmd::Session;
+using yk::rp2040::FlashStore;
+
+// Short press = slot 1, long press = slot 2 (YubiKey convention).
+void press_slot(Session& session, FlashStore& flash, yk::core::Slot slot,
+                std::uint64_t epoch_now_secs) noexcept {
+    const std::uint32_t idx = static_cast<std::uint32_t>(slot);
+    auto& cfg = session.slots[idx];
+    auto& state = session.states[idx];
+    if (cfg.mode == yk::core::SlotMode::unset) return;
+
+    const auto text = yk::core::execute_slot(cfg, state, epoch_now_secs);
+    if (text.len == 0) return;
+
+    if (cfg.mode == yk::core::SlotMode::hotp) session.config_dirty = true;  // counter moved
+    yk::rp2040::usb_type_text({text.text.data(), text.len});
+
+    // Persist any state change (HOTP counter) once the loop turns.
+    if (session.config_dirty) flash.save(session);
+    session.config_dirty = false;
+}
+
+} // namespace
 
 int main() {
     stdio_init_all();
@@ -16,8 +44,8 @@ int main() {
     yk::rp2040::Led led(25);
     yk::rp2040::Button button(15);
 
-    yk::core::cmd::Session session{};
-    yk::rp2040::FlashStore store;
+    Session session{};
+    FlashStore store;
     store.load(session);
 
     yk::core::PressScanner scanner;
@@ -25,33 +53,36 @@ int main() {
     uart.puts("pico-yubikey\n");
     led.on();
 
+    yk::rp2040::usb_init();
+
     std::array<std::uint8_t, 256> in_buf{};
     std::array<std::uint8_t, 256> out_buf{};
     std::size_t in_len = 0;
-    bool led_state = false;
 
     for (;;) {
-        // Button scan
         const bool pressed = button.is_pressed();
         const std::uint64_t now_us = to_us_since_boot(get_absolute_time());
-        const auto event = scanner.update(pressed, now_us);
+        const std::uint64_t epoch = yk::core::cmd::epoch_secs(session, now_us / 1'000'000);
 
-        if (event == yk::core::PressScanner::Event::short_press ||
-            event == yk::core::PressScanner::Event::long_press) {
-            const std::uint64_t epoch = yk::core::cmd::epoch_secs(session, now_us / 1'000'000);
-            const auto text = yk::core::execute_slot(session.slots[0], session.states[0], epoch);
-            // TODO: send text via USB HID keyboard
-            led_state = !led_state;
-            led_state ? led.on() : led.off();
+        yk::rp2040::usb_poll(session, epoch);
+
+        switch (scanner.update(pressed, now_us)) {
+            case yk::core::PressScanner::Event::short_press:
+                press_slot(session, store, yk::core::Slot::slot1, epoch);
+                break;
+            case yk::core::PressScanner::Event::long_press:
+                press_slot(session, store, yk::core::Slot::slot2, epoch);
+                break;
+            case yk::core::PressScanner::Event::repeat:
+            case yk::core::PressScanner::Event::none:
+                break;
         }
 
         // UART config protocol — same binary frames as USB CDC
         while (uart.available()) {
             char c = uart.getc();
-            if (c == yk::core::cmd::kFrameEnd) {
+            if (c == static_cast<char>(yk::core::cmd::kFrameEnd)) {
                 if (in_len > 0) {
-                    const std::uint64_t epoch =
-                        yk::core::cmd::epoch_secs(session, now_us / 1'000'000);
                     const auto n = yk::core::cmd::dispatch(
                         session,
                         std::span<const std::uint8_t>(in_buf.data(), in_len),

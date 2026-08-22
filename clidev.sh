@@ -8,17 +8,18 @@ FW_BUILD_DIR="build-fw"
 UF2="$FW_BUILD_DIR/src/pico_yubikey.uf2"
 RESC="renode/pico_yubikey.resc"
 
-# ── helpers ───────────────────────────────────────────────────────────────
 
-ensure_docker() {
+# ========== helpers ============
+
+# todo!() add self check for OS
+ensure_docker(){
     if ! docker info >/dev/null 2>&1; then
-        echo "Docker engine not running — starting OrbStack..."
+        echo "Docker engine not running - starting Orbstack..."
         open -a OrbStack 2>/dev/null || open -a "Docker Desktop" 2>/dev/null || true
-        for i in $(seq 1 30); do
+        for idx in {1..30};do
             docker info >/dev/null 2>&1 && break
             sleep 1
         done
-        docker info >/dev/null 2>&1 || { echo "Docker failed to start"; exit 1; }
     fi
 }
 
@@ -40,18 +41,18 @@ Commands:
   <anything>     Pass through to docker run
 
 Examples:
-  ./dev.sh test                          # run tests in Docker
-  ./dev.sh build                         # build firmware
-  ./dev.sh flash                         # flash connected Pico
-  ./dev.sh renode                        # interactive Renode session
-  ./dev.sh shell                         # drop into container shell
-  ./dev.sh g++ -std=c++20 -Iinclude ...  # custom compile in container
+  ./clidev.sh test                          # run tests in Docker
+  ./clidev.sh build                         # build firmware
+  ./clidev.sh flash                         # flash connected Pico
+  ./clidev.sh renode                        # interactive Renode session
+  ./clidev.sh shell                         # drop into container shell
+  ./clidev.sh g++ -std=c++20 -Iinclude ...  # custom compile in container
 EOF
 }
 
-# ── commands ──────────────────────────────────────────────────────────────
+# ======= COMMANDS ======
 
-cmd_test() {
+cmd_test(){
     ensure_docker
     docker build -t "$IMAGE" .
     echo "=== Building and running tests in Docker ==="
@@ -59,13 +60,13 @@ cmd_test() {
         bash -cm "cmake -B $BUILD_DIR && cmake --build $BUILD_DIR && ctest --test-dir $BUILD_DIR --output-on-failure"
 }
 
-cmd_shell() {
+cmd_shell(){
     ensure_docker
     docker build -t "$IMAGE" .
     docker run --rm -it -v "$(pwd)":/app "$IMAGE" bash
 }
 
-cmd_build() {
+cmd_build(){
     if [ ! -d "${PICO_SDK_PATH:-$HOME/pico-sdk}/external" ]; then
         echo "ERROR: Pico SDK not found at PICO_SDK_PATH=${PICO_SDK_PATH:-$HOME/pico-sdk}"
         echo "Install: git clone https://github.com/raspberrypi/pico-sdk.git --recurse-submodules"
@@ -78,7 +79,7 @@ cmd_build() {
     echo "Flash: ./dev.sh flash"
 }
 
-cmd_flash() {
+cmd_flash(){
     if [ ! -f "$UF2" ]; then
         echo "ERROR: $UF2 not found — run './dev.sh build' first"
         exit 1
@@ -96,7 +97,7 @@ cmd_flash() {
     echo "Flashed and rebooted."
 }
 
-cmd_renode() {
+cmd_renode(){
     if ! command -v renode &>/dev/null; then
         echo "ERROR: renode not found"
         echo "Install: brew install renode   (macOS)"
@@ -142,8 +143,7 @@ cmd_lint() {
                  find include/core -name '*.hpp' | xargs clang-tidy -std=c++20 -- -Iinclude"
 }
 
-# ── dispatch ──────────────────────────────────────────────────────────────
-
+# ===== Dispatch ======
 case "${1:-test}" in
     test)           cmd_test ;;
     shell|bash)     cmd_shell ;;
@@ -153,6 +153,6 @@ case "${1:-test}" in
     renode-test)    cmd_renode_test ;;
     renode-algo)    cmd_renode_algo ;;
     lint)           cmd_lint ;;
-    -h|--help)      usage ;;
+    h|help)      usage ;;
     *)              docker run --rm -it -v "$(pwd)":/app "$IMAGE" "$@" ;;
 esac

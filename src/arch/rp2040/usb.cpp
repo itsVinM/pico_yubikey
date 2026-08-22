@@ -2,6 +2,9 @@
 
 #include "core/command.hpp"
 #include "pico/time.h"
+#include "tusb.h"
+
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <span>
@@ -153,17 +156,17 @@ namespace yk::rp2040{
         std::size_t cdc_frame_len = 0;
 
         void process_cdc_frame(
-            cmd::Session& session,
+            yk::core::cmd::Session& session,
             std::uint64_t epoch_now_secs) noexcept {
 
             std::array<std::uint8_t, 96> resp{};
-            const std::size_t n = cmd::dispatch(
+            const std::size_t n = yk::core::cmd::dispatch(
                 session,
                 std::span<const std::uint8_t>(cdc_frame).first(cdc_frame_len), resp,
                 epoch_now_secs);
             if (!tud_cdc_connected()) return;
             tud_cdc_write(resp.data(), n);
-            const std::uint8_t eot = cmd::kFrameEnd;
+            const std::uint8_t eot = yk::core::cmd::kFrameEnd;
             tud_cdc_write(&eot, 1);
             tud_cdc_write_flush();
         }
@@ -171,7 +174,7 @@ namespace yk::rp2040{
     } // namespace
 
     void usb_init() noexcept {tusb_init();}
-    void usb_pool(cmd::Session& session, std::uint64_t epoch_now_secs) noexcept{
+    void usb_poll(yk::core::cmd::Session& session, std::uint64_t epoch_now_secs) noexcept{
         tud_task();
     
         // CDC: accumulate until the frame terminator, then dispatch.
@@ -179,9 +182,9 @@ namespace yk::rp2040{
             std::uint8_t b = 0;
             tud_cdc_read(&b, 1);
             if (cdc_frame_len < cdc_frame.size()) cdc_frame[cdc_frame_len++] = b;
-            if (b == cmd::kFrameEnd || cdc_frame_len == cdc_frame.size()) {
+            if (b == yk::core::cmd::kFrameEnd || cdc_frame_len == cdc_frame.size()) {
                 // Strip the terminator byte before dispatch.
-                if (cdc_frame_len > 0 && cdc_frame[cdc_frame_len - 1] == cmd::kFrameEnd)
+                if (cdc_frame_len > 0 && cdc_frame[cdc_frame_len - 1] == yk::core::cmd::kFrameEnd)
                     cdc_frame_len--;
                 process_cdc_frame(session, epoch_now_secs);
                 cdc_frame_len = 0;

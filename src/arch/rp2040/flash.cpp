@@ -1,5 +1,4 @@
 #include "arch/rp2040/flash.hpp"
-
 #include "hardware/flash.h"
 #include <cstring>
 
