@@ -16,3 +16,4 @@ Testing/
 
 # QEMU RP2040 fork (cloned/built locally, see README)
 tools/
+build/

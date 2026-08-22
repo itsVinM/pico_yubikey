@@ -6,7 +6,6 @@ IMAGE="pico-yubikey-dev"
 BUILD_DIR="build-host"
 FW_BUILD_DIR="build-fw"
 UF2="$FW_BUILD_DIR/src/pico_yubikey.uf2"
-QEMU="tools/qemu-rp2040/build/qemu-system-arm"
 
 
 # ========== helpers ============
@@ -96,33 +95,27 @@ cmd_flash(){
 }
 
 cmd_qemu(){
-    if [ ! -x "$QEMU" ]; then
-        echo "ERROR: $QEMU not found"
-        echo "Build it: see tools/qemu-rp2040 (configure+build the RP2040 fork)"
-        exit 1
-    fi
     if [ ! -f "$FW_BUILD_DIR/src/pico_yubikey.elf" ]; then
         echo "ERROR: ELF not found — run './clidev.sh build' first"
         exit 1
     fi
-    exec "$QEMU" -M raspi-pico -kernel "$FW_BUILD_DIR/src/pico_yubikey.elf" -nographic -serial mon:stdio
+    ensure_docker
+    docker build -t "$IMAGE" .
+    exec docker run --rm -it -v "$(pwd)":/app "$IMAGE" \
+        qemu-system-arm -M raspi-pico \
+        -kernel "$FW_BUILD_DIR/src/pico_yubikey.elf" \
+        -nographic -serial mon:stdio
 }
 
 cmd_robot_test() {
-    if ! python3 -c "import robot" &>/dev/null; then
-        echo "ERROR: Robot Framework not installed"
-        echo "Install: pip3 install robotframework"
-        exit 1
-    fi
     if [ ! -f "$FW_BUILD_DIR/src/pico_yubikey.elf" ]; then
         echo "ERROR: ELF not found — run './clidev.sh build' first"
         exit 1
     fi
-    if [ ! -x "$QEMU" ]; then
-        echo "ERROR: $QEMU not found — build tools/qemu-rp2040 first"
-        exit 1
-    fi
-    python3 -m robot --outputdir build/robot tests/robot
+    ensure_docker
+    docker build -t "$IMAGE" .
+    docker run --rm -v "$(pwd)":/app "$IMAGE" \
+        python3 -m robot --outputdir build/robot tests/robot
 }
 
 cmd_lint() {

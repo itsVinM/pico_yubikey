@@ -91,6 +91,8 @@ int main() {
                         uart.puts(std::string_view(
                             reinterpret_cast<const char*>(out_buf.data()), n));
                     }
+                    // Same framing as the CDC path: terminate with EOT.
+                    uart.putc(static_cast<char>(yk::core::cmd::kFrameEnd));
                     in_len = 0;
                 }
             } else if (in_len < in_buf.size()) {
